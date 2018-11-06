@@ -3,10 +3,13 @@
 #include <fstream>
 #include <cstring>
 #include <string>
+#include <cmath>
+#include <stdlib.h>
 #include "/ee259/tools/pro_5/inversion.h"
 
 using namespace std;
 
+ifstream input_file_temp;	
 ofstream output_file("out.5", ios::out);
 
 class MATRIX: public PROGRAM_BANK{
@@ -100,7 +103,15 @@ class MATRIX: public PROGRAM_BANK{
 MATRIX::MATRIX(int d1, int d2)
         :PROGRAM_BANK(d1) // CALL THE CONSTRUCTOR OF THE BASE CLASS
 {
-
+	int dim1 = d1 - 1; //Convert to index form.
+	int dim2 = d2 - 1;
+	int allocatedMemory = sqrt(sizeof(A)/sizeof(A[0][0])); //Allocated Memory of Array.
+							       //Assuming Array has equal dims.
+	for(int i = 0; i < dim1; i++){ //Possibly do full allocated matrix.
+		for(int j = 0; j < dim2; j++){
+			A[i][j] = 0;
+		}
+	}
 }
 
 // SECOND CONSTRUCTOR
@@ -108,26 +119,80 @@ MATRIX::MATRIX(int d1, int d2, char * file_name)
         :PROGRAM_BANK(d1, file_name) // CALL THE CONSTRUCTOR OF THE BASE CLASS
 {
 	 // your constructor code goes here
+	output_file << "+++ P5 START +++++++++++++++++++++++++++++++++++++++++" << endl;
+	
+	int allocatedMemory = sqrt(sizeof(A)/sizeof(A[0][0])); //Allocated Memory of Array.
+	int in_file_length = sizeof(in_file)/sizeof(in_file[0]);
+	int file_name_length = strlen(file_name);
+	cout << in_file_length << endl;
+	if(d1 >= 1 && d2 >= 1 && d1 <= allocatedMemory && d2 <= allocatedMemory && file_name_length < in_file_length){
+	// store the input file name:
+	strcpy(in_file, file_name);
 
-	 // store the input file name:
-	 strcpy(in_file, file_name);
-
-	 // define the input file
- 	 ifstream input_file(in_file,ios::in);
-
+	// define the input file
+ 	ifstream input_file(in_file,ios::in);
+	
+	int dim1 = d1 - 1; //Convert to index form.
+	int dim2 = d2 - 1;
+	for (int i = 0; i < dim1; i++){
+		for(int j = 0; j < dim2; j++){
+			input_file >> A[i][j];
+		}
+	}
+	output_file << "+++ P5_OUTPUT >>> CREATED A " << d1 << " X " << d2 << " MATRIX FROM " << in_file << endl;
+	}
+	else{
+		output_file << "+++ P5_OUTPUT >>> INPUT ERROR" << endl;
+		output_file << "+++ P5_OUTPUT >>> UNABLE TO CREATE MATRIX" << endl;
+		output_file << "+++ P5_OUTPUT >>> EXITING PROGRAM" << endl;
+		output_file << "+++ P5 END +++++++++++++++++++++++++++++++++++++++++++" << endl;
+		exit (EXIT_FAILURE);
+	}
+	output_file << "+++ P5 END +++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
 MATRIX operator / (int c, MATRIX a_matrix)
 {
         MATRIX temp_matrix(a_matrix.dim1, a_matrix.dim2);
+	
+	output_file << "+++ P5 START +++++++++++++++++++++++++++++++++++++++++" << endl;
+	a_matrix.INVERT_MATRIX("OUT_5_TEMP.txt");
+	input_file_temp.open("OUT_5_TEMP.txt", ios::in);
 
+	for(int i = 0; i < temp_matrix.dim1; i++){
+		for(int j = 0; j < temp_matrix.dim2; j++){
+			input_file_temp >> temp_matrix.A[i][j];
+		}
+	}
+	
+	input_file_temp.close();
+	input_file_temp.clear();
+	output_file << "+++ P5_OUTPUT >>> THE RESULT OF c / X OPERATION IS:" << endl;
+	for(int i = 0; i < temp_matrix.dim1; i++){
+		for(int j = 0; j < temp_matrix.dim2; j++){
+			temp_matrix.A[i][j] = temp_matrix.A[i][j] * c;
+			output_file << temp_matrix.A[i][j] << " ";
+		}
+		output_file << endl;
+	}
+	output_file << "+++ P5 END +++++++++++++++++++++++++++++++++++++++++++" << endl;
         return temp_matrix;
 }
 
 MATRIX operator * (int c, MATRIX a_matrix)
 {
         MATRIX temp_matrix(a_matrix.dim1, a_matrix.dim2);
-
+	output_file << "+++ P5 START +++++++++++++++++++++++++++++++++++++++++" << endl;
+	output_file << "+++ P5_OUTPUT >>> THE RESULT OF c * X OPERATION IS:" << endl;
+	
+	for(int i = 0; i < temp_matrix.dim1; i++){
+		for(int j = 0; j < temp_matrix.dim2; j++){
+			temp_matrix.A[i][j] = temp_matrix.A[i][j] * c;
+			output_file << temp_matrix.A[i][j] << " ";
+		}
+		output_file << endl;
+	}
+	output_file << "+++ P5 END +++++++++++++++++++++++++++++++++++++++++++" << endl;
         return temp_matrix;
 }
 
@@ -145,7 +210,7 @@ MATRIX::operator < (int b)
 
 
 void
-MATRIX::operator = (MATRIX  a_matrix)
+MATRIX::operator = (MATRIX a_matrix)
 {
 
 }
