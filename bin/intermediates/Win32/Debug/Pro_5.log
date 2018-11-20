@@ -1,0 +1,11 @@
+﻿  main5_1.cc
+c:\dev\visual studio\pro_5\pro_5\src\inversion.h(62): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\dev\visual studio\pro_5\pro_5\src\p5.h(112): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\dev\visual studio\pro_5\pro_5\src\p5.h(128): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\dev\visual studio\pro_5\pro_5\src\p5.h(225): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\dev\visual studio\pro_5\pro_5\src\p5.h(229): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\dev\visual studio\pro_5\pro_5\src\p5.h(234): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\dev\visual studio\pro_5\pro_5\src\p5.h(239): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\dev\visual studio\pro_5\pro_5\src\p5.h(243): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\dev\visual studio\pro_5\pro_5\src\p5.h(249): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+  Pro_5.vcxproj -> C:\Dev\Visual Studio\Pro_5\bin\Win32\Debug\Pro_5.exe
