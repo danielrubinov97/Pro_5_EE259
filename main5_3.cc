@@ -6,6 +6,7 @@ int main ()
 
 	X.PRINT();
 	
+	X += Y;
 	X *= Y;
 	
 	Y.PRINT();

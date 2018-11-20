@@ -5,12 +5,16 @@
 #include <string>
 #include <cmath>
 #include <stdlib.h>
-#include "/ee259/tools/pro_5/inversion.h"
+#include "inversion.h"
 
 using namespace std;
 
 ifstream input_file_temp;	
 ofstream output_file("out.5", ios::out);
+
+#define LOG_START output_file << "+++ P5 START +++++++++++++++++++++++++++++++++++++++++" << endl
+#define LOG_END output_file << "+++ P5 END +++++++++++++++++++++++++++++++++++++++++++" << endl
+
 
 class MATRIX: public PROGRAM_BANK{
 
@@ -47,7 +51,7 @@ class MATRIX: public PROGRAM_BANK{
 			// into out.5 file;
 			// returns no values;
 
-	  int  operator < (int); //example: if( X < b)
+	  int  operator < (double); //example: if( X < b)
 			// check if the minimum element of the matrix X
 			// is less than b
 			// returns 1 if so; returns 0 otherwise;
@@ -103,9 +107,9 @@ class MATRIX: public PROGRAM_BANK{
 MATRIX::MATRIX(int d1, int d2)
         :PROGRAM_BANK(d1) // CALL THE CONSTRUCTOR OF THE BASE CLASS
 {
-	int dim1 = d1 - 1; //Convert to index form.
-	int dim2 = d2 - 1;
-	int allocatedMemory = sqrt(sizeof(A)/sizeof(A[0][0])); //Allocated Memory of Array.
+	dim1 = d1;
+	dim2 = d2;
+	//float allocatedMemory = sqrt(sizeof(A)/sizeof(A[0][0])); //Allocated Memory of Array.
 							       //Assuming Array has equal dims.
 	for(int i = 0; i < dim1; i++){ //Possibly do full allocated matrix.
 		for(int j = 0; j < dim2; j++){
@@ -119,43 +123,54 @@ MATRIX::MATRIX(int d1, int d2, char * file_name)
         :PROGRAM_BANK(d1, file_name) // CALL THE CONSTRUCTOR OF THE BASE CLASS
 {
 	 // your constructor code goes here
-	output_file << "+++ P5 START +++++++++++++++++++++++++++++++++++++++++" << endl;
+	LOG_START;
 	
-	int allocatedMemory = sqrt(sizeof(A)/sizeof(A[0][0])); //Allocated Memory of Array.
+	float allocatedMemory = sqrt(sizeof(A)/sizeof(A[0][0])); //Allocated Memory of Array.
 	int in_file_length = sizeof(in_file)/sizeof(in_file[0]);
 	int file_name_length = strlen(file_name);
-	cout << in_file_length << endl;
-	if(d1 >= 1 && d2 >= 1 && d1 <= allocatedMemory && d2 <= allocatedMemory && file_name_length < in_file_length){
+	dim1 = d1;
+	dim2 = d2;
+	if(d1 >= 1 && d2 >= 1 && d1 <= 20 && d2 <= 20 && file_name_length < in_file_length){
 	// store the input file name:
 	strcpy(in_file, file_name);
 
 	// define the input file
  	ifstream input_file(in_file,ios::in);
 	
-	int dim1 = d1 - 1; //Convert to index form.
-	int dim2 = d2 - 1;
+	
+
 	for (int i = 0; i < dim1; i++){
 		for(int j = 0; j < dim2; j++){
 			input_file >> A[i][j];
 		}
 	}
-	output_file << "+++ P5_OUTPUT >>> CREATED A " << d1 << " X " << d2 << " MATRIX FROM " << in_file << endl;
+	output_file << "+++ P5_OUTPUT >>> CREATED A " << dim1 << " X " << dim2 << " MATRIX FROM " << in_file << endl;
 	}
 	else{
 		output_file << "+++ P5_OUTPUT >>> INPUT ERROR" << endl;
 		output_file << "+++ P5_OUTPUT >>> UNABLE TO CREATE MATRIX" << endl;
 		output_file << "+++ P5_OUTPUT >>> EXITING PROGRAM" << endl;
-		output_file << "+++ P5 END +++++++++++++++++++++++++++++++++++++++++++" << endl;
+		LOG_END;
 		exit (EXIT_FAILURE);
 	}
-	output_file << "+++ P5 END +++++++++++++++++++++++++++++++++++++++++++" << endl;
+	/*
+	cout << dim1 << " " << dim2 << endl;
+	for (int i = 0; i < dim1; i++){
+	  for(int j = 0; j < dim2; j++){
+	    cout << A[i][j];
+	  }
+	  cout << endl;
+	}
+	cout << "---------" << endl;
+	*/
+	LOG_END;
 }
 
 MATRIX operator / (int c, MATRIX a_matrix)
 {
         MATRIX temp_matrix(a_matrix.dim1, a_matrix.dim2);
 	
-	output_file << "+++ P5 START +++++++++++++++++++++++++++++++++++++++++" << endl;
+	LOG_START;
 	a_matrix.INVERT_MATRIX("OUT_5_TEMP.txt");
 	input_file_temp.open("OUT_5_TEMP.txt", ios::in);
 
@@ -167,72 +182,208 @@ MATRIX operator / (int c, MATRIX a_matrix)
 	
 	input_file_temp.close();
 	input_file_temp.clear();
-	output_file << "+++ P5_OUTPUT >>> THE RESULT OF c / X OPERATION IS:" << endl;
+	output_file << "+++ P5_OUTPUT >>> THE RESULT OF "<< c << " / X OPERATION IS:" << endl;
 	for(int i = 0; i < temp_matrix.dim1; i++){
 		for(int j = 0; j < temp_matrix.dim2; j++){
 			temp_matrix.A[i][j] = temp_matrix.A[i][j] * c;
-			output_file << temp_matrix.A[i][j] << " ";
 		}
-		output_file << endl;
 	}
-	output_file << "+++ P5 END +++++++++++++++++++++++++++++++++++++++++++" << endl;
+	for (int i=0; i<a_matrix.dim1; i++)
+	  {
+		  for (int j=0; j<a_matrix.dim2; j++)
+		  {
+						  
+			output_file<<setprecision(2)<<setiosflags(ios::fixed|ios::showpoint)<<temp_matrix.A[i][j]<<" ";  
+		  }
+		  output_file<<endl;
+	  }
+	LOG_END;
         return temp_matrix;
 }
 
 MATRIX operator * (int c, MATRIX a_matrix)
 {
         MATRIX temp_matrix(a_matrix.dim1, a_matrix.dim2);
-	output_file << "+++ P5 START +++++++++++++++++++++++++++++++++++++++++" << endl;
-	output_file << "+++ P5_OUTPUT >>> THE RESULT OF c * X OPERATION IS:" << endl;
+	LOG_START;
+	output_file << "+++ P5_OUTPUT >>> THE RESULT OF " << c << " * X OPERATION IS:" << endl;
 	
 	for(int i = 0; i < temp_matrix.dim1; i++){
 		for(int j = 0; j < temp_matrix.dim2; j++){
-			temp_matrix.A[i][j] = temp_matrix.A[i][j] * c;
+			temp_matrix.A[i][j] = a_matrix.A[i][j] * c;
 			output_file << temp_matrix.A[i][j] << " ";
 		}
 		output_file << endl;
 	}
-	output_file << "+++ P5 END +++++++++++++++++++++++++++++++++++++++++++" << endl;
+	LOG_END;
         return temp_matrix;
 }
 
 void
 MATRIX::PRINT( )
 {
+	LOG_START;
+	output_file << "+++ P5_OUTPUT >>> CONTENTS OF MATRIX IS:" << endl;
+	for (int i = 0; i < dim1; i++) {
+		for (int j = 0; j < dim2; j++) {
+			output_file << setprecision(2) << setiosflags(ios::fixed | ios::showpoint) <<A[i][j] << " ";
+		}
+		output_file << endl;
+	}
+	LOG_END;
 
 }
 
 int
-MATRIX::operator < (int b)
+MATRIX::operator < (double b) //FOR SOME REASON THIS WAS AN INT WHY!?????!!?!?!?!
 {
-        return 0;
+    //FIND MINIMUM
+	int i, j, min, min_pos, temp;
+	LOG_START;
+	//cout << dim1 << " " << dim2 << endl;
+	for (i = 0; i < dim1; i++) {
+		min = A[i][0];
+		min_pos = 0;
+		for (j = 0; j < dim2; j++) {
+			if (min > A[i][j]) {
+				min = A[i][j];
+				min_pos = j;
+			}
+		}
+		//SWAP
+		temp = A[i][0];
+		A[i][0] = A[i][min_pos];
+		A[i][min_pos] = temp;
+	}
+	//Order First Number In Array By Size
+	min = A[i][0];
+	min_pos = 0;
+	for (i = 0; i < dim1; i++) {
+		if (min > A[i][0]) {
+			min = A[i][0];
+			min_pos = i;
+		}
+	}
+	//SWAP ROWS
+	for (int i = 0; i < dim2; i++) {
+		temp = A[min_pos][i];
+		A[min_pos][i] = A[0][i];
+		A[0][i] = temp;
+	}
+	/*
+	cout << dim1 << " " << dim2 << endl;
+	for (int i = 0; i < dim1; i++){
+	  for(int j = 0; j < dim2; j++){
+	    cout << A[i][j];
+	  }
+	  cout << endl;
+	}
+	*/
+	if (A[0][0] < b) {
+		output_file << "+++ P5_OUTPUT >>> OVERLOADED OPERATOR < RETURNING TRUE" << endl;
+		LOG_END;
+		return 1;
+	}
+	else {
+		output_file << "+++ P5_OUTPUT >>> OVERLOADED OPERATOR < RETURNING FALSE" << endl;
+		LOG_END;
+		return 0;
+	}
 }
 
 
 void
 MATRIX::operator = (MATRIX a_matrix)
 {
-
+	LOG_START;
+	//cout << dim1 << " " << a_matrix.dim1 << endl;
+	if (dim1 == a_matrix.dim1 && dim2 == a_matrix.dim2) {
+		for(int i = 0; i < dim1; i++){
+		  for(int j = 0; j < dim2; j++){
+		    //cout << A[i][j] << " " << a_matrix.A[i][j] << endl;
+		    //cout << "--------" << endl;
+		    A[i][j] = a_matrix.A[i][j];
+		    //cout << A[i][j] << " " << a_matrix.A[i][j] << endl;
+		    //cout << "--------" << endl;
+		  }
+		}
+		output_file << "+++ P5_OUTPUT >>> OVERLOADED OPERATOR = COMPLETED" << endl;
+	}
+	else {
+		output_file << "+++ P5_OUTPUT >>> ERROR" << endl;
+		output_file << "+++ P5_OUTPUT >>> INCOMPATIBLE MATRICES" << endl;
+	}
+	LOG_END;
 }
 
 void
 MATRIX::operator += (MATRIX a_matrix)
 {
-
+	LOG_START;
+	if (dim1 == a_matrix.dim1 && dim2 == a_matrix.dim2) {
+		for (int i = 0; i < dim1; i++) {
+			for (int j = 0; j < dim2; j++) {
+				A[i][j] = A[i][j] + a_matrix.A[i][j];
+			}
+		}
+		output_file << "+++ P5_OUTPUT >>> OVERLOADED OPERATOR += COMPLETED" << endl;
+	}
+	else {
+		output_file << "+++ P5_OUTPUT >>> ERROR" << endl;
+		output_file << "+++ P5_OUTPUT >>> INCOMPATIBLE MATRICES" << endl;
+	}
+	LOG_END;
 }
 
 void
 MATRIX::operator *= (MATRIX a_matrix)
 {
-
+	LOG_START;
+	if (dim1 == a_matrix.dim1 && dim2 == a_matrix.dim2) {
+		MATRIX temp_matrix(dim1, dim2);
+		for (int i = 0; i < dim1; i++) {
+			for (int j = 0; j < dim2; j++) {
+				for(int k = 0; k < dim2; k++){
+					temp_matrix.A[i][j] += A[i][k] * a_matrix.A[k][j];
+				    }
+				}
+			}
+		for(int i = 0; i < dim1; i++){
+		  for(int j = 0; j < dim2; j++){
+		    //cout << A[i][j] << " " << a_matrix.A[i][j] << endl;
+		    //cout << "--------" << endl;
+		    A[i][j] = temp_matrix.A[i][j];
+		    //cout << A[i][j] << " " << a_matrix.A[i][j] << endl;
+		    //cout << "--------" << endl;
+		  }
+		}
+		output_file << "+++ P5_OUTPUT >>> OVERLOADED OPERATOR *= COMPLETED" << endl;
+	}
+	else {
+		output_file << "+++ P5_OUTPUT >>> ERROR" << endl;
+		output_file << "+++ P5_OUTPUT >>> INCOMPATIBLE MATRICES" << endl;
+	}
+	LOG_END;
 }
 
 MATRIX
 MATRIX::operator + (MATRIX a_matrix)
 {
         MATRIX temp_matrix(dim1, dim2);
-
-
+		LOG_START;
+		
+		if (dim1 == a_matrix.dim1 && dim2 == a_matrix.dim2) {
+			for (int i = 0; i < dim1; i++) {
+				for (int j = 0; j < dim2; j++) {
+					temp_matrix.A[i][j] = A[i][j] + a_matrix.A[i][j];
+				}
+			}
+			output_file << "+++ P5_OUTPUT >>> OVERLOADED OPERATOR + COMPLETED" << endl;
+		}
+		else {
+			output_file << "+++ P5_OUTPUT >>> ERROR" << endl;
+			output_file << "+++ P5_OUTPUT >>> INCOMPATIBLE MATRICES" << endl;
+		}
+		LOG_END;
         return temp_matrix;
 }
 
@@ -240,7 +391,23 @@ MATRIX
 MATRIX::operator * (MATRIX a_matrix)
 {
         MATRIX temp_matrix(dim1, dim2);
+		LOG_START;
+		if (dim1 == a_matrix.dim1 && dim2 == a_matrix.dim2) {
 
+			for (int i = 0; i < dim1; i++) {
+				for (int j = 0; j < dim2; j++) {
+				    for(int k = 0; k < dim2; k++){
+					temp_matrix.A[i][j] += A[i][k] * a_matrix.A[k][j];
+				    }
+				}
+			}
+			output_file << "+++ P5_OUTPUT >>> OVERLOADED OPERATOR * COMPLETED" << endl;
+		}
+		else {
+			output_file << "+++ P5_OUTPUT >>> ERROR" << endl;
+			output_file << "+++ P5_OUTPUT >>> INCOMPATIBLE MATRICES" << endl;
+		}
+		LOG_END;
 
         return temp_matrix;
 }
@@ -249,7 +416,41 @@ MATRIX
 MATRIX::operator / (MATRIX a_matrix)
 {
         MATRIX temp_matrix(dim1, dim2);
+	MATRIX inverted_matrix(dim1, dim2);
+		LOG_START;
+		if (dim1 == a_matrix.dim1 && dim2 == a_matrix.dim2) {
+			a_matrix.INVERT_MATRIX("OUT_5_TEMP.txt");
+			input_file_temp.open("OUT_5_TEMP.txt", ios::in);
 
+			for (int i = 0; i < inverted_matrix.dim1; i++) {
+				for (int j = 0; j < inverted_matrix.dim2; j++) {
+					input_file_temp >> inverted_matrix.A[i][j];
+				}
+			}
+
+			input_file_temp.close();
+			input_file_temp.clear();
+			output_file << "+++ P5_OUTPUT >>> OVERLOADED OPERATOR / COMPLETED" << endl;
+			output_file << "+++ P5_OUTPUT >>> THE RESULT OF X/Y OPERATION IS:" << endl;
+			for (int i = 0; i < dim1; i++) {
+				for (int j = 0; j < dim2; j++) {
+				    for(int k = 0; k < dim2; k++){
+					temp_matrix.A[i][j] += A[i][k] * inverted_matrix.A[k][j];
+				    }
+				}
+			}
+			for(int i = 0; i < a_matrix.dim1; i++){
+			  for(int j = 0; j < a_matrix.dim2; j++){
+			    output_file << setprecision(2) << setiosflags(ios::fixed | ios::showpoint) << temp_matrix.A[i][j] << " ";
+			  }
+			  output_file << endl;
+			}
+		}
+		else {
+			output_file << "+++ P5_OUTPUT >>> ERROR" << endl;
+			output_file << "+++ P5_OUTPUT >>> INCOMPATIBLE MATRICES" << endl;
+		}
+		LOG_END;
 
         return temp_matrix;
 }
